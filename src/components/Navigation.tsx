@@ -1,73 +1,58 @@
-import { Button } from "@/components/ui/button";
+import { Users, Clock, Calendar, DollarSign, TrendingUp, FileText, Home } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Clock, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp,
-  Settings,
-  FileText
-} from "lucide-react";
-
-interface NavigationProps {
-  activeSection?: string;
-  onSectionChange?: (section: string) => void;
-}
 
 const navigationItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "employees", label: "Employees", icon: Users },
-  { id: "attendance", label: "Attendance", icon: Clock },
-  { id: "leave", label: "Leave Management", icon: Calendar },
-  { id: "payroll", label: "Payroll", icon: DollarSign },
-  { id: "performance", label: "Performance", icon: TrendingUp },
-  { id: "reports", label: "Reports", icon: FileText },
-  { id: "settings", label: "Settings", icon: Settings },
+  { name: 'Dashboard', icon: Home, href: '/dashboard' },
+  { name: 'Employees', icon: Users, href: '/employees' },
+  { name: 'Attendance', icon: Clock, href: '/attendance' },
+  { name: 'Leave Management', icon: Calendar, href: '/leave' },
+  { name: 'Payroll', icon: DollarSign, href: '/payroll' },
+  { name: 'Performance', icon: TrendingUp, href: '#' },
+  { name: 'Reports', icon: FileText, href: '#' },
 ];
 
-export function Navigation({ activeSection = "dashboard", onSectionChange }: NavigationProps) {
+export function Navigation() {
+  const location = useLocation();
+  
   return (
-    <nav className="w-64 bg-card border-r border-border/50 min-h-screen p-4">
-      <div className="space-y-2">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
-          
-          return (
-            <Button
-              key={item.id}
-              variant={isActive ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start text-left font-medium transition-all duration-200",
-                isActive 
-                  ? "bg-primary text-primary-foreground shadow-md" 
-                  : "hover:bg-secondary/80 text-muted-foreground hover:text-foreground"
-              )}
-              onClick={() => onSectionChange?.(item.id)}
-            >
-              <Icon className="mr-3 h-5 w-5" />
-              {item.label}
-            </Button>
-          );
-        })}
-      </div>
-      
-      {/* Quick Actions */}
-      <div className="mt-8 pt-8 border-t border-border/50">
-        <h4 className="text-sm font-semibold text-muted-foreground mb-3 px-3">Quick Actions</h4>
-        <div className="space-y-2">
-          <Button variant="outline" size="sm" className="w-full justify-start">
-            <Users className="mr-2 h-4 w-4" />
-            Add Employee
-          </Button>
-          <Button variant="outline" size="sm" className="w-full justify-start">
-            <Calendar className="mr-2 h-4 w-4" />
-            Leave Request
-          </Button>
+    <aside className="w-64 bg-card border-r border-border/50 min-h-screen">
+      <div className="p-6">
+        <div className="flex items-center space-x-3">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold">HR</span>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">HRPro</h2>
+            <p className="text-xs text-muted-foreground">Management System</p>
+          </div>
         </div>
+
+        <nav className="mt-8">
+          <ul className="space-y-2">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.href;
+              return (
+                <li key={item.name}>
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-primary/10 hover:text-primary",
+                      isActive
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:text-primary"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
-    </nav>
+    </aside>
   );
 }

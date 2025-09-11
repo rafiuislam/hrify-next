@@ -118,13 +118,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header userRole="Admin" userName="Sarah Mitchell" />
+      <Header />
       
       <div className="flex">
-        <Navigation 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection} 
-        />
+        <Navigation />
         
         <main className="flex-1 p-8">
           {/* Hero Section */}
