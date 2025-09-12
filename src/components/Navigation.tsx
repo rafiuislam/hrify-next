@@ -1,19 +1,49 @@
 import { Users, Clock, Calendar, DollarSign, TrendingUp, FileText, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const navigationItems = [
-  { name: 'Dashboard', icon: Home, href: '/dashboard' },
-  { name: 'Employees', icon: Users, href: '/employees' },
-  { name: 'Attendance', icon: Clock, href: '/attendance' },
-  { name: 'Leave Management', icon: Calendar, href: '/leave' },
-  { name: 'Payroll', icon: DollarSign, href: '/payroll' },
-  { name: 'Performance', icon: TrendingUp, href: '#' },
-  { name: 'Reports', icon: FileText, href: '#' },
-];
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Navigation() {
   const location = useLocation();
+  const { user } = useAuth();
+  
+  // Define navigation items based on user role
+  const getNavItems = () => {
+    const baseItems = [
+      { name: 'Dashboard', icon: Home, href: '/dashboard' }
+    ];
+
+    if (user?.role === 'admin') {
+      return [
+        ...baseItems,
+        { name: 'Employees', icon: Users, href: '/employees' },
+        { name: 'Attendance', icon: Clock, href: '/attendance' },
+        { name: 'Leave Management', icon: Calendar, href: '/leave' },
+        { name: 'Payroll', icon: DollarSign, href: '/payroll' },
+        { name: 'Performance', icon: TrendingUp, href: '#' },
+        { name: 'Reports', icon: FileText, href: '#' },
+      ];
+    } else if (user?.role === 'hr') {
+      return [
+        ...baseItems,
+        { name: 'Employees', icon: Users, href: '/employees' },
+        { name: 'Attendance', icon: Clock, href: '/attendance' },
+        { name: 'Leave Management', icon: Calendar, href: '/leave' },
+        { name: 'Performance', icon: TrendingUp, href: '#' },
+        { name: 'Reports', icon: FileText, href: '#' },
+      ];
+    } else if (user?.role === 'employee') {
+      return [
+        ...baseItems,
+        { name: 'Attendance', icon: Clock, href: '/attendance' },
+        { name: 'Leave Management', icon: Calendar, href: '/leave' },
+      ];
+    }
+
+    return baseItems;
+  };
+
+  const navigationItems = getNavItems();
   
   return (
     <aside className="w-64 bg-card border-r border-border/50 min-h-screen">

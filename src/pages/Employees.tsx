@@ -11,9 +11,11 @@ import { Employee } from '@/types/employee';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Employees() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [employees, setEmployees] = useLocalStorage<Employee[]>('hrms_employees', []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
@@ -118,10 +120,12 @@ export default function Employees() {
                 className="pl-10"
               />
             </div>
-            <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate('/add-employee')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Employee
-            </Button>
+            {(user?.role === 'admin' || user?.role === 'hr') && (
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate('/add-employee')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Employee
+              </Button>
+            )}
           </div>
 
           <Card>
@@ -155,22 +159,26 @@ export default function Employees() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/edit-employee/${employee.id}`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteEmployee(employee.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {(user?.role === 'admin' || user?.role === 'hr') && (
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate(`/edit-employee/${employee.id}`)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            {user?.role === 'admin' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDeleteEmployee(employee.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

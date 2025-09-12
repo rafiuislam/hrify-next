@@ -10,8 +10,10 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { DollarSign, Plus, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Payroll() {
+  const { user } = useAuth();
   const [payrollRecords, setPayrollRecords] = useLocalStorage<PayrollRecord[]>('hrms_payroll', []);
 
   useEffect(() => {
@@ -111,10 +113,12 @@ export default function Payroll() {
 
           <div className="flex justify-between items-center mb-6">
             <div></div>
-            <Button onClick={handleGeneratePayroll} className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Generate Payroll
-            </Button>
+            {user?.role === 'admin' && (
+              <Button onClick={handleGeneratePayroll} className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Payroll
+              </Button>
+            )}
           </div>
 
           <Card>

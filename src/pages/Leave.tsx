@@ -11,9 +11,11 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { Calendar, Plus, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Leave() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>('hrms_leave_requests', []);
 
   useEffect(() => {
@@ -169,7 +171,7 @@ export default function Leave() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {request.status === 'pending' && (
+                        {request.status === 'pending' && (user?.role === 'admin' || user?.role === 'hr') && (
                           <div className="flex space-x-2">
                             <Button 
                               variant="outline" 
