@@ -10,8 +10,10 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import AddEmployee from "./pages/AddEmployee";
+import EditEmployee from "./pages/EditEmployee";
 import Attendance from "./pages/Attendance";
 import Leave from "./pages/Leave";
+import NewLeaveRequest from "./pages/NewLeaveRequest";
 import Payroll from "./pages/Payroll";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +34,9 @@ const App = () => (
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
             <Route path="/leave" element={<ProtectedRoute><Leave /></ProtectedRoute>} />
             <Route path="/add-employee" element={<ProtectedRoute><AddEmployee /></ProtectedRoute>} />
+            <Route path="/edit-employee/:id" element={<ProtectedRoute><EditEmployee /></ProtectedRoute>} />
+            <Route path="/new-leave-request" element={<ProtectedRoute><NewLeaveRequest /></ProtectedRoute>} />
+            <Route path="/payroll" element={<ProtectedRoute><Payroll /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

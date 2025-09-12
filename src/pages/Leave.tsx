@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
 
 export default function Leave() {
+  const navigate = useNavigate();
   const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>('hrms_leave_requests', []);
 
   useEffect(() => {
@@ -121,7 +123,10 @@ export default function Leave() {
 
           <div className="flex justify-between items-center mb-6">
             <div></div>
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button 
+              className="bg-primary hover:bg-primary/90"
+              onClick={() => navigate('/new-leave-request')}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Leave Request
             </Button>
