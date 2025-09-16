@@ -28,8 +28,9 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     accountName: '',
     bankName: '',
     amount: '',
+    currency: '৳',
     date: '',
-    description: ''
+    purpose: ''
   });
 
   const receiptAccounts = [
@@ -99,6 +100,13 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     'Jamuna Bank Ltd.'
   ];
 
+  const currencies = [
+    { symbol: '$', name: 'Dollar' },
+    { symbol: '£', name: 'Pound' },
+    { symbol: '€', name: 'Euro' },
+    { symbol: '৳', name: 'Taka' }
+  ];
+
   useEffect(() => {
     // Initialize with sample data if empty
     if (records.length === 0) {
@@ -110,9 +118,10 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           type: 'receipt',
           accountName: 'Cash Sales',
           amount: 991626.61,
+          currency: '৳',
           date: currentDate,
           period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Monthly revenue collection',
+          purpose: 'Monthly revenue collection',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
         },
@@ -121,9 +130,10 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           type: 'payment',
           accountName: 'Rent',
           amount: 45000,
+          currency: '৳',
           date: currentDate,
           period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Office rent payment',
+          purpose: 'Office rent payment',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
         }
@@ -159,9 +169,10 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
         ? `${formData.accountName} - ${formData.bankName}` 
         : formData.accountName,
       amount: parseFloat(formData.amount),
+      currency: formData.currency,
       date: formData.date,
       period: `${new Date(formData.date).toLocaleString('default', { month: 'long' })} ${new Date(formData.date).getFullYear()}`,
-      description: formData.description,
+      purpose: formData.purpose,
       createdBy: user?.id || 'admin',
       createdAt: editingRecord?.createdAt || new Date().toISOString()
     };
@@ -191,8 +202,9 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       accountName: '',
       bankName: '',
       amount: '',
+      currency: '৳',
       date: '',
-      description: ''
+      purpose: ''
     });
     setEditingRecord(null);
     setIsDialogOpen(false);
@@ -212,8 +224,9 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       accountName: accountName,
       bankName: bankName,
       amount: record.amount.toString(),
+      currency: record.currency || '৳',
       date: record.date,
-      description: record.description || ''
+      purpose: record.purpose || ''
     });
     setIsDialogOpen(true);
   };
@@ -246,7 +259,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ৳{totalReceipts.toLocaleString()}
+              {totalReceipts.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               {records.filter(r => r.type === 'receipt').length} receipt(s)
@@ -261,7 +274,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ৳{totalPayments.toLocaleString()}
+              {totalPayments.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               {records.filter(r => r.type === 'payment').length} payment(s)
@@ -308,15 +321,33 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="amount">Amount (৳)</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        value={formData.amount}
-                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                        required
-                      />
+                      <Label htmlFor="amount">Amount</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={formData.currency}
+                          onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies.map((currency) => (
+                              <SelectItem key={currency.symbol} value={currency.symbol}>
+                                {currency.symbol}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          value={formData.amount}
+                          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                          required
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
                   </div>
                   
@@ -373,12 +404,12 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Description *</Label>
+                    <Label htmlFor="purpose">Purpose *</Label>
                     <Textarea
-                      id="description"
-                      placeholder="Required description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      id="purpose"
+                      placeholder="Required purpose"
+                      value={formData.purpose}
+                      onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
                       required
                     />
                   </div>
@@ -405,7 +436,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                 <TableHead>Amount</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Period</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead>Purpose</TableHead>
                 {canEdit && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -421,10 +452,10 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{record.accountName}</TableCell>
-                  <TableCell className="font-medium">৳{record.amount.toLocaleString()}</TableCell>
+                  <TableCell className="font-medium">{record.currency}{record.amount.toLocaleString()}</TableCell>
                   <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
                   <TableCell>{record.period}</TableCell>
-                  <TableCell>{record.description || '-'}</TableCell>
+                  <TableCell>{record.purpose || '-'}</TableCell>
                   {canEdit && (
                     <TableCell>
                       <div className="flex space-x-2">

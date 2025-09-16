@@ -57,9 +57,10 @@ export interface ReceiptPaymentRecord {
   type: 'receipt' | 'payment';
   accountName: string;
   amount: number;
+  currency: string;
   date: string;
   period: string;
-  description?: string;
+  purpose?: string;
   createdBy: string;
   createdAt: string;
 }
