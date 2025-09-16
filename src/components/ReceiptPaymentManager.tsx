@@ -26,36 +26,92 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
   const [formData, setFormData] = useState({
     type: 'receipt' as 'receipt' | 'payment',
     accountName: '',
+    bankName: '',
     amount: '',
     date: '',
-    period: '',
     description: ''
   });
 
-  const commonBankAccounts = [
+  const receiptAccounts = [
+    'Cash Sales',
+    'Bank Deposit',
+    'Customer Payments (Receivables)',
+    'Loan or Advance Received',
+    'Investment/Owner\'s Contribution',
+    'Refunds/Recoveries',
+    'Miscellaneous Income',
+    'Interest Income'
+  ];
+
+  const paymentAccounts = [
+    'Supplier Payments',
+    'Rent',
+    'Utility Payments (Electricity, Water, Internet, etc.)',
+    'Salaries/Wages',
+    'Loan Repayments',
+    'Tax Payments',
+    'Bank Charges',
+    'Insurance Premiums',
+    'Purchase of Assets/Materials',
+    'Repairs and Maintenance',
+    'Travel',
+    'Stationeries',
+    'Meal & Entertainment',
+    'Courier',
+    'VAT Payment',
+    'Legal & Professional Fees',
+    'Convenience',
+    'Computer & Accessories',
+    'Business & Development',
+    'Miscellaneous Expenses'
+  ];
+
+  const bangladeshBanks = [
     'ICB Islamic Bank Ltd.',
-    'Exim Bank',
-    'Dutch-Bangla Bank',
-    'Brac Bank',
-    'City Bank',
-    'Eastern Bank',
-    'Cash'
+    'Exim Bank Ltd.',
+    'Dutch-Bangla Bank Ltd.',
+    'BRAC Bank Ltd.',
+    'City Bank Ltd.',
+    'Eastern Bank Ltd.',
+    'Sonali Bank Ltd.',
+    'Janata Bank Ltd.',
+    'Agrani Bank Ltd.',
+    'Rupali Bank Ltd.',
+    'Standard Bank Ltd.',
+    'Prime Bank Ltd.',
+    'Southeast Bank Ltd.',
+    'Dhaka Bank Ltd.',
+    'Islami Bank Bangladesh Ltd.',
+    'Social Islami Bank Ltd.',
+    'First Security Islami Bank Ltd.',
+    'Al-Arafah Islami Bank Ltd.',
+    'Union Bank Ltd.',
+    'United Commercial Bank Ltd.',
+    'Mercantile Bank Ltd.',
+    'Mutual Trust Bank Ltd.',
+    'NCC Bank Ltd.',
+    'Pubali Bank Ltd.',
+    'The Trust Bank Ltd.',
+    'Bank Asia Ltd.',
+    'Midland Bank Ltd.',
+    'Modhumoti Bank Ltd.',
+    'Meghna Bank Ltd.',
+    'Jamuna Bank Ltd.'
   ];
 
   useEffect(() => {
     // Initialize with sample data if empty
     if (records.length === 0) {
       const currentDate = new Date().toISOString().split('T')[0];
-      const currentPeriod = `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`;
       
       const sampleRecords: ReceiptPaymentRecord[] = [
         {
           id: '1',
           type: 'receipt',
-          accountName: 'ICB Islamic Bank Ltd.',
+          accountName: 'Cash Sales',
           amount: 991626.61,
           date: currentDate,
-          period: currentPeriod,
+          period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
           description: 'Monthly revenue collection',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
@@ -63,10 +119,10 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
         {
           id: '2',
           type: 'payment',
-          accountName: 'Exim Bank',
+          accountName: 'Rent',
           amount: 45000,
           date: currentDate,
-          period: currentPeriod,
+          period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
           description: 'Office rent payment',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
@@ -99,10 +155,12 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     const newRecord: ReceiptPaymentRecord = {
       id: editingRecord?.id || Date.now().toString(),
       type: formData.type,
-      accountName: formData.accountName,
+      accountName: formData.bankName && (formData.accountName === 'Bank Deposit' || formData.accountName === 'Bank Charges') 
+        ? `${formData.accountName} - ${formData.bankName}` 
+        : formData.accountName,
       amount: parseFloat(formData.amount),
       date: formData.date,
-      period: formData.period,
+      period: `${new Date(formData.date).toLocaleString('default', { month: 'long' })} ${new Date(formData.date).getFullYear()}`,
       description: formData.description,
       createdBy: user?.id || 'admin',
       createdAt: editingRecord?.createdAt || new Date().toISOString()
@@ -131,9 +189,9 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     setFormData({
       type: 'receipt',
       accountName: '',
+      bankName: '',
       amount: '',
       date: '',
-      period: '',
       description: ''
     });
     setEditingRecord(null);
@@ -143,13 +201,18 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
   const handleEdit = (record: ReceiptPaymentRecord) => {
     if (!canEdit) return;
     
+    // Extract bank name if it's a bank deposit/charge
+    const isBank = record.accountName.includes(' - ');
+    const accountName = isBank ? record.accountName.split(' - ')[0] : record.accountName;
+    const bankName = isBank ? record.accountName.split(' - ')[1] : '';
+    
     setEditingRecord(record);
     setFormData({
       type: record.type,
-      accountName: record.accountName,
+      accountName: accountName,
+      bankName: bankName,
       amount: record.amount.toString(),
       date: record.date,
-      period: record.period,
       description: record.description || ''
     });
     setIsDialogOpen(true);
@@ -261,13 +324,13 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                     <Label htmlFor="accountName">Account Name</Label>
                     <Select
                       value={formData.accountName}
-                      onValueChange={(value) => setFormData({ ...formData, accountName: value })}
+                      onValueChange={(value) => setFormData({ ...formData, accountName: value, bankName: '' })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select account" />
                       </SelectTrigger>
                       <SelectContent>
-                        {commonBankAccounts.map((account) => (
+                        {(formData.type === 'receipt' ? receiptAccounts : paymentAccounts).map((account) => (
                           <SelectItem key={account} value={account}>
                             {account}
                           </SelectItem>
@@ -276,36 +339,47 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Bank Name dropdown - only show if Bank Deposit or Bank Charges is selected */}
+                  {(formData.accountName === 'Bank Deposit' || formData.accountName === 'Bank Charges') && (
                     <div>
-                      <Label htmlFor="date">Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        required
-                      />
+                      <Label htmlFor="bankName">Bank Name</Label>
+                      <Select
+                        value={formData.bankName}
+                        onValueChange={(value) => setFormData({ ...formData, bankName: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select bank" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bangladeshBanks.map((bank) => (
+                            <SelectItem key={bank} value={bank}>
+                              {bank}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="period">Period</Label>
-                      <Input
-                        id="period"
-                        placeholder="e.g., January 2025"
-                        value={formData.period}
-                        onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                        required
-                      />
-                    </div>
+                  )}
+
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      required
+                    />
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">Description *</Label>
                     <Textarea
                       id="description"
-                      placeholder="Optional description"
+                      placeholder="Required description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      required
                     />
                   </div>
 
