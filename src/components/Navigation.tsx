@@ -29,6 +29,7 @@ export function Navigation() {
         { name: 'Employees', icon: Users, href: '/employees' },
         { name: 'Attendance', icon: Clock, href: '/attendance' },
         { name: 'Leave Management', icon: Calendar, href: '/leave' },
+        { name: 'Payroll', icon: DollarSign, href: '/payroll' },
         { name: 'Performance', icon: TrendingUp, href: '#' },
         { name: 'Reports', icon: FileText, href: '#' },
       ];

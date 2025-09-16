@@ -37,7 +37,7 @@ const App = () => (
             <Route path="/add-employee" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><AddEmployee /></RoleGuard></ProtectedRoute>} />
             <Route path="/edit-employee/:id" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><EditEmployee /></RoleGuard></ProtectedRoute>} />
             <Route path="/new-leave-request" element={<ProtectedRoute><NewLeaveRequest /></ProtectedRoute>} />
-            <Route path="/payroll" element={<ProtectedRoute><RoleGuard allowedRoles={['admin']}><Payroll /></RoleGuard></ProtectedRoute>} />
+            <Route path="/payroll" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><Payroll /></RoleGuard></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

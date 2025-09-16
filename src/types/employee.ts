@@ -51,3 +51,15 @@ export interface PayrollRecord {
   netSalary: number;
   status: 'draft' | 'processed' | 'paid';
 }
+
+export interface ReceiptPaymentRecord {
+  id: string;
+  type: 'receipt' | 'payment';
+  accountName: string;
+  amount: number;
+  date: string;
+  period: string;
+  description?: string;
+  createdBy: string;
+  createdAt: string;
+}
