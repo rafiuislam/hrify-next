@@ -29,7 +29,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     bankName: '',
     amount: '',
     date: '',
-    description: ''
+    Purpose: ''
   });
 
   const receiptAccounts = [
@@ -112,7 +112,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           amount: 991626.61,
           date: currentDate,
           period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Monthly revenue collection',
+          Purpose: 'Monthly revenue collection',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
         },
@@ -123,7 +123,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
           amount: 45000,
           date: currentDate,
           period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Office rent payment',
+          Purpose: 'Office rent payment',
           createdBy: user?.id || 'admin',
           createdAt: new Date().toISOString()
         }
@@ -161,7 +161,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       amount: parseFloat(formData.amount),
       date: formData.date,
       period: `${new Date(formData.date).toLocaleString('default', { month: 'long' })} ${new Date(formData.date).getFullYear()}`,
-      description: formData.description,
+      Purpose: formData.Purpose,
       createdBy: user?.id || 'admin',
       createdAt: editingRecord?.createdAt || new Date().toISOString()
     };
@@ -192,7 +192,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       bankName: '',
       amount: '',
       date: '',
-      description: ''
+      Purpose: ''
     });
     setEditingRecord(null);
     setIsDialogOpen(false);
@@ -213,7 +213,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       bankName: bankName,
       amount: record.amount.toString(),
       date: record.date,
-      description: record.description || ''
+      Purpose: record.Purpose || ''
     });
     setIsDialogOpen(true);
   };
@@ -373,12 +373,12 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Description *</Label>
+                    <Label htmlFor="Purpose">Purpose *</Label>
                     <Textarea
-                      id="description"
-                      placeholder="Required description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      id="Purpose"
+                      placeholder="Required Purpose"
+                      value={formData.Purpose}
+                      onChange={(e) => setFormData({ ...formData, Purpose: e.target.value })}
                       required
                     />
                   </div>
@@ -405,7 +405,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                 <TableHead>Amount</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Period</TableHead>
-                <TableHead>Description</TableHead>
+                <TableHead>Purpose</TableHead>
                 {canEdit && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -424,7 +424,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
                   <TableCell className="font-medium">৳{record.amount.toLocaleString()}</TableCell>
                   <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
                   <TableCell>{record.period}</TableCell>
-                  <TableCell>{record.description || '-'}</TableCell>
+                  <TableCell>{record.Purpose || '-'}</TableCell>
                   {canEdit && (
                     <TableCell>
                       <div className="flex space-x-2">
