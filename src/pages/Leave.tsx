@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { LeaveRequest } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLeave } from '@/hooks/useLeave';
 import { Calendar, Plus, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
@@ -16,80 +16,39 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Leave() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>('hrms_leave_requests', []);
-
-  useEffect(() => {
-    // Initialize with sample data if empty
-    if (leaveRequests.length === 0) {
-      const sampleRequests: LeaveRequest[] = [
-        {
-          id: '1',
-          employeeId: '1',
-          type: 'vacation',
-          startDate: '2024-01-20',
-          endDate: '2024-01-25',
-          reason: 'Family vacation',
-          status: 'approved',
-          appliedDate: '2024-01-10',
-          approvedBy: 'HR Manager',
-          approvedDate: '2024-01-12'
-        },
-        {
-          id: '2',
-          employeeId: '2',
-          type: 'sick',
-          startDate: '2024-01-15',
-          endDate: '2024-01-16',
-          reason: 'Medical appointment',
-          status: 'pending',
-          appliedDate: '2024-01-14'
-        },
-        {
-          id: '3',
-          employeeId: '3',
-          type: 'personal',
-          startDate: '2024-01-30',
-          endDate: '2024-01-30',
-          reason: 'Personal matters',
-          status: 'rejected',
-          appliedDate: '2024-01-25'
-        }
-      ];
-      setLeaveRequests(sampleRequests);
-    }
-  }, [leaveRequests.length, setLeaveRequests]);
+  const { leaves, updateLeave, getPendingLeaves, getApprovedLeaves, getRejectedLeaves } = useLeave();
 
   const handleApprove = (id: string) => {
-    setLeaveRequests(prev => prev.map(request => 
-      request.id === id 
-        ? { 
-            ...request, 
-            status: 'approved', 
-            approvedBy: 'HR Manager', 
-            approvedDate: new Date().toISOString().split('T')[0] 
-          }
-        : request
-    ));
-    toast({
-      title: "Leave Approved",
-      description: "The leave request has been approved.",
-    });
+    const leave = leaves.find(l => l.id === id);
+    if (leave) {
+      updateLeave(id, {
+        ...leave,
+        status: 'approved',
+        approvedBy: 'HR Manager',
+        approvedDate: new Date().toISOString().split('T')[0]
+      });
+      toast({
+        title: "Leave Approved",
+        description: "The leave request has been approved.",
+      });
+    }
   };
 
   const handleReject = (id: string) => {
-    setLeaveRequests(prev => prev.map(request => 
-      request.id === id ? { ...request, status: 'rejected' } : request
-    ));
-    toast({
-      title: "Leave Rejected",
-      description: "The leave request has been rejected.",
-      variant: "destructive",
-    });
+    const leave = leaves.find(l => l.id === id);
+    if (leave) {
+      updateLeave(id, { ...leave, status: 'rejected' });
+      toast({
+        title: "Leave Rejected",
+        description: "The leave request has been rejected.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const pendingRequests = leaveRequests.filter(req => req.status === 'pending').length;
-  const approvedRequests = leaveRequests.filter(req => req.status === 'approved').length;
-  const rejectedRequests = leaveRequests.filter(req => req.status === 'rejected').length;
+  const pendingRequests = getPendingLeaves().length;
+  const approvedRequests = getApprovedLeaves().length;
+  const rejectedRequests = getRejectedLeaves().length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,7 +111,7 @@ export default function Leave() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {leaveRequests.map((request) => (
+                  {leaves.map((request) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.employeeId}</TableCell>
                       <TableCell className="capitalize">{request.type}</TableCell>

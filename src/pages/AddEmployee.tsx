@@ -9,13 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { Employee } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useEmployees } from '@/hooks/useEmployees';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 
 export default function AddEmployee() {
   const navigate = useNavigate();
-  const [employees, setEmployees] = useLocalStorage<Employee[]>('hrms_employees', []);
+  const { addEmployee } = useEmployees();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,7 +54,7 @@ export default function AddEmployee() {
       }
     };
 
-    setEmployees(prev => [...prev, newEmployee]);
+    addEmployee(newEmployee);
     
     toast({
       title: "Employee Added",

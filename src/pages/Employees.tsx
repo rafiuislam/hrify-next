@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { Employee } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useEmployees } from '@/hooks/useEmployees';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,69 +16,9 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Employees() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [employees, setEmployees] = useLocalStorage<Employee[]>('hrms_employees', []);
+  const { employees, deleteEmployee } = useEmployees();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-
-  useEffect(() => {
-    // Initialize with sample data if empty
-    if (employees.length === 0) {
-      const sampleEmployees: Employee[] = [
-        {
-          id: '1',
-          name: 'John Doe',
-          email: 'john.doe@company.com',
-          phone: '+1-555-0123',
-          department: 'Engineering',
-          position: 'Senior Developer',
-          dateOfJoining: '2023-01-15',
-          salary: 75000,
-          status: 'active',
-          address: '123 Main St, City, State 12345',
-          emergencyContact: {
-            name: 'Jane Doe',
-            phone: '+1-555-0124',
-            relationship: 'Spouse'
-          }
-        },
-        {
-          id: '2',
-          name: 'Sarah Wilson',
-          email: 'sarah.wilson@company.com',
-          phone: '+1-555-0125',
-          department: 'Marketing',
-          position: 'Marketing Manager',
-          dateOfJoining: '2022-08-20',
-          salary: 65000,
-          status: 'active',
-          address: '456 Oak Ave, City, State 12345',
-          emergencyContact: {
-            name: 'Mike Wilson',
-            phone: '+1-555-0126',
-            relationship: 'Spouse'
-          }
-        },
-        {
-          id: '3',
-          name: 'Michael Chen',
-          email: 'michael.chen@company.com',
-          phone: '+1-555-0127',
-          department: 'Finance',
-          position: 'Financial Analyst',
-          dateOfJoining: '2023-03-10',
-          salary: 58000,
-          status: 'active',
-          address: '789 Pine St, City, State 12345',
-          emergencyContact: {
-            name: 'Lisa Chen',
-            phone: '+1-555-0128',
-            relationship: 'Sister'
-          }
-        }
-      ];
-      setEmployees(sampleEmployees);
-    }
-  }, [employees.length, setEmployees]);
 
   useEffect(() => {
     const filtered = employees.filter(employee =>
@@ -91,8 +31,7 @@ export default function Employees() {
   }, [employees, searchTerm]);
 
   const handleDeleteEmployee = (id: string) => {
-    const updatedEmployees = employees.filter(emp => emp.id !== id);
-    setEmployees(updatedEmployees);
+    deleteEmployee(id);
     toast({
       title: "Employee Deleted",
       description: "Employee has been successfully removed from the system.",

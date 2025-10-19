@@ -6,40 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { AttendanceRecord } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAttendance } from '@/hooks/useAttendance';
 import { Clock, Calendar, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
 
 export default function Attendance() {
-  const [attendanceRecords, setAttendanceRecords] = useLocalStorage<AttendanceRecord[]>('hrms_attendance', []);
-
-  useEffect(() => {
-    // Initialize with sample data if empty
-    if (attendanceRecords.length === 0) {
-      const today = new Date();
-      const sampleRecords: AttendanceRecord[] = [];
-      
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        
-        ['1', '2', '3'].forEach(employeeId => {
-          sampleRecords.push({
-            id: `${employeeId}-${date.toISOString().split('T')[0]}`,
-            employeeId,
-            date: date.toISOString().split('T')[0],
-            checkIn: '09:00',
-            checkOut: '17:30',
-            status: Math.random() > 0.1 ? 'present' : 'absent',
-            totalHours: 8.5
-          });
-        });
-      }
-      
-      setAttendanceRecords(sampleRecords);
-    }
-  }, [attendanceRecords.length, setAttendanceRecords]);
+  const { attendance, addAttendance, updateAttendance, getTodayAttendance } = useAttendance();
 
   const handleCheckIn = () => {
     const now = new Date();
@@ -56,7 +29,7 @@ export default function Attendance() {
       totalHours: 0
     };
     
-    setAttendanceRecords(prev => [...prev, newRecord]);
+    addAttendance(newRecord);
     toast({
       title: "Checked In",
       description: `Check-in recorded at ${currentTime}`,
@@ -67,20 +40,21 @@ export default function Attendance() {
     const now = new Date();
     const currentTime = now.toTimeString().slice(0, 5);
     
-    setAttendanceRecords(prev => prev.map(record => {
-      if (record.employeeId === 'current-user' && record.checkOut === '') {
-        const checkInTime = new Date(`1970-01-01T${record.checkIn}:00`);
-        const checkOutTime = new Date(`1970-01-01T${currentTime}:00`);
-        const totalHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
-        
-        return {
-          ...record,
-          checkOut: currentTime,
-          totalHours: Number(totalHours.toFixed(2))
-        };
-      }
-      return record;
-    }));
+    const userRecord = attendance.find(record => 
+      record.employeeId === 'current-user' && record.checkOut === ''
+    );
+    
+    if (userRecord) {
+      const checkInTime = new Date(`1970-01-01T${userRecord.checkIn}:00`);
+      const checkOutTime = new Date(`1970-01-01T${currentTime}:00`);
+      const totalHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
+      
+      updateAttendance(userRecord.id, {
+        ...userRecord,
+        checkOut: currentTime,
+        totalHours: Number(totalHours.toFixed(2))
+      });
+    }
     
     toast({
       title: "Checked Out",
@@ -88,10 +62,7 @@ export default function Attendance() {
     });
   };
 
-  const todayRecords = attendanceRecords.filter(record => 
-    record.date === new Date().toISOString().split('T')[0]
-  );
-  
+  const todayRecords = getTodayAttendance();
   const presentToday = todayRecords.filter(record => record.status === 'present').length;
   const absentToday = todayRecords.filter(record => record.status === 'absent').length;
 
@@ -121,7 +92,7 @@ export default function Attendance() {
             />
             <StatsCard
               title="Total Records"
-              value={attendanceRecords.length}
+              value={attendance.length}
               icon={Clock}
               changeType="neutral"
             />
@@ -162,7 +133,7 @@ export default function Attendance() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attendanceRecords.slice(0, 20).map((record) => (
+                  {attendance.slice(0, 20).map((record) => (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium">{record.employeeId}</TableCell>
                       <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>

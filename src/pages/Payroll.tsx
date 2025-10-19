@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { PayrollRecord } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { usePayroll } from '@/hooks/usePayroll';
 import { DollarSign, Plus, Download, Receipt } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
@@ -16,50 +16,7 @@ import { ReceiptPaymentManager } from '@/components/ReceiptPaymentManager';
 
 export default function Payroll() {
   const { user } = useAuth();
-  const [payrollRecords, setPayrollRecords] = useLocalStorage<PayrollRecord[]>('hrms_payroll', []);
-
-  useEffect(() => {
-    // Initialize with sample data if empty
-    if (payrollRecords.length === 0) {
-      const currentYear = new Date().getFullYear();
-      const sampleRecords: PayrollRecord[] = [
-        {
-          id: '1',
-          employeeId: '1',
-          month: 'December',
-          year: currentYear,
-          basicSalary: 75000,
-          allowances: 5000,
-          deductions: 8000,
-          netSalary: 72000,
-          status: 'paid'
-        },
-        {
-          id: '2',
-          employeeId: '2',
-          month: 'December',
-          year: currentYear,
-          basicSalary: 65000,
-          allowances: 3000,
-          deductions: 6500,
-          netSalary: 61500,
-          status: 'processed'
-        },
-        {
-          id: '3',
-          employeeId: '3',
-          month: 'December',
-          year: currentYear,
-          basicSalary: 58000,
-          allowances: 2000,
-          deductions: 5800,
-          netSalary: 54200,
-          status: 'draft'
-        }
-      ];
-      setPayrollRecords(sampleRecords);
-    }
-  }, [payrollRecords.length, setPayrollRecords]);
+  const { payroll, getPayrollByStatus } = usePayroll();
 
   const handleGeneratePayroll = () => {
     toast({
@@ -75,11 +32,10 @@ export default function Payroll() {
     });
   };
 
-  const totalSalaryPaid = payrollRecords
-    .filter(record => record.status === 'paid')
+  const totalSalaryPaid = getPayrollByStatus('paid')
     .reduce((sum, record) => sum + record.netSalary, 0);
 
-  const totalEmployeesProcessed = payrollRecords.length;
+  const totalEmployeesProcessed = payroll.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +63,7 @@ export default function Payroll() {
             />
             <StatsCard
               title="Pending Payments"
-              value={payrollRecords.filter(r => r.status === 'processed').length}
+              value={getPayrollByStatus('processed').length}
               icon={DollarSign}
               changeType="neutral"
             />
@@ -150,7 +106,7 @@ export default function Payroll() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {payrollRecords.map((record) => (
+                      {payroll.map((record) => (
                         <TableRow key={record.id}>
                           <TableCell className="font-medium">{record.employeeId}</TableCell>
                           <TableCell>{record.month}</TableCell>

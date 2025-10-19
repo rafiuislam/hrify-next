@@ -9,13 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { LeaveRequest } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLeave } from '@/hooks/useLeave';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Calendar } from 'lucide-react';
 
 export default function NewLeaveRequest() {
   const navigate = useNavigate();
-  const [leaveRequests, setLeaveRequests] = useLocalStorage<LeaveRequest[]>('hrms_leave_requests', []);
+  const { addLeave } = useLeave();
   const [formData, setFormData] = useState({
     type: '',
     startDate: '',
@@ -50,7 +50,7 @@ export default function NewLeaveRequest() {
       appliedDate: new Date().toISOString().split('T')[0]
     };
 
-    setLeaveRequests(prev => [...prev, newLeaveRequest]);
+    addLeave(newLeaveRequest);
     
     toast({
       title: "Leave Request Submitted",

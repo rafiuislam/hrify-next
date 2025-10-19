@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ReceiptPaymentRecord } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useReceiptPayment } from '@/hooks/useReceiptPayment';
 import { Plus, Edit, Trash2, Receipt, CreditCard } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +20,7 @@ interface ReceiptPaymentManagerProps {
 
 export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
   const { user } = useAuth();
-  const [records, setRecords] = useLocalStorage<ReceiptPaymentRecord[]>('hrms_receipt_payment', []);
+  const { receiptPayments, addReceiptPayment, updateReceiptPayment, deleteReceiptPayment, getTotalReceipts, getTotalPayments } = useReceiptPayment();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ReceiptPaymentRecord | null>(null);
   const [formData, setFormData] = useState({
@@ -99,46 +99,8 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     'Jamuna Bank Ltd.'
   ];
 
-  useEffect(() => {
-    // Initialize with sample data if empty
-    if (records.length === 0) {
-      const currentDate = new Date().toISOString().split('T')[0];
-      
-      const sampleRecords: ReceiptPaymentRecord[] = [
-        {
-          id: '1',
-          type: 'receipt',
-          accountName: 'Cash Sales',
-          amount: 991626.61,
-          date: currentDate,
-          period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Monthly revenue collection',
-          createdBy: user?.id || 'admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          type: 'payment',
-          accountName: 'Rent',
-          amount: 45000,
-          date: currentDate,
-          period: `${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()}`,
-          description: 'Office rent payment',
-          createdBy: user?.id || 'admin',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setRecords(sampleRecords);
-    }
-  }, [records.length, setRecords, user?.id]);
-
-  const totalReceipts = records
-    .filter(record => record.type === 'receipt')
-    .reduce((sum, record) => sum + record.amount, 0);
-
-  const totalPayments = records
-    .filter(record => record.type === 'payment')
-    .reduce((sum, record) => sum + record.amount, 0);
+  const totalReceipts = getTotalReceipts();
+  const totalPayments = getTotalPayments();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,15 +129,13 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
     };
 
     if (editingRecord) {
-      setRecords(records.map(record => 
-        record.id === editingRecord.id ? newRecord : record
-      ));
+      updateReceiptPayment(editingRecord.id, newRecord);
       toast({
         title: "Record Updated",
         description: "Receipt/Payment record has been updated successfully."
       });
     } else {
-      setRecords([...records, newRecord]);
+      addReceiptPayment(newRecord);
       toast({
         title: "Record Added",
         description: "New receipt/payment record has been added successfully."
@@ -228,7 +188,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
       return;
     }
 
-    setRecords(records.filter(record => record.id !== id));
+    deleteReceiptPayment(id);
     toast({
       title: "Record Deleted",
       description: "Receipt/Payment record has been deleted successfully."
@@ -249,7 +209,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
               ৳{totalReceipts.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              {records.filter(r => r.type === 'receipt').length} receipt(s)
+              {receiptPayments.filter(r => r.type === 'receipt').length} receipt(s)
             </p>
           </CardContent>
         </Card>
@@ -264,7 +224,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
               ৳{totalPayments.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              {records.filter(r => r.type === 'payment').length} payment(s)
+              {receiptPayments.filter(r => r.type === 'payment').length} payment(s)
             </p>
           </CardContent>
         </Card>
@@ -410,7 +370,7 @@ export function ReceiptPaymentManager({ canEdit }: ReceiptPaymentManagerProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {records.map((record) => (
+              {receiptPayments.map((record) => (
                 <TableRow key={record.id}>
                   <TableCell>
                     <Badge 

@@ -9,14 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { Employee } from '@/types/employee';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useEmployees } from '@/hooks/useEmployees';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 
 export default function EditEmployee() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [employees, setEmployees] = useLocalStorage<Employee[]>('hrms_employees', []);
+  const { employees, updateEmployee, getEmployeeById } = useEmployees();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,7 +32,8 @@ export default function EditEmployee() {
   });
 
   useEffect(() => {
-    const employee = employees.find(emp => emp.id === id);
+    if (!id) return;
+    const employee = getEmployeeById(id);
     if (employee) {
       setFormData({
         name: employee.name,
@@ -55,7 +56,7 @@ export default function EditEmployee() {
       });
       navigate('/employees');
     }
-  }, [id, employees, navigate]);
+  }, [id, getEmployeeById, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -63,15 +64,17 @@ export default function EditEmployee() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!id) return;
     
+    const existingEmployee = getEmployeeById(id);
     const updatedEmployee: Employee = {
-      id: id!,
+      id: id,
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
       department: formData.department,
       position: formData.position,
-      dateOfJoining: employees.find(emp => emp.id === id)?.dateOfJoining || new Date().toISOString().split('T')[0],
+      dateOfJoining: existingEmployee?.dateOfJoining || new Date().toISOString().split('T')[0],
       salary: Number(formData.salary),
       status: formData.status,
       address: formData.address,
@@ -82,7 +85,7 @@ export default function EditEmployee() {
       }
     };
 
-    setEmployees(prev => prev.map(emp => emp.id === id ? updatedEmployee : emp));
+    updateEmployee(id, updatedEmployee);
     
     toast({
       title: "Employee Updated",
