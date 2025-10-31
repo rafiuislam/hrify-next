@@ -63,3 +63,23 @@ export interface ReceiptPaymentRecord {
   createdBy: string;
   createdAt: string;
 }
+
+export interface PerformanceReview {
+  id: string;
+  employeeId: string;
+  reviewPeriodStart: string;
+  reviewPeriodEnd: string;
+  rating: number; // 1-5
+  goals: Goal[];
+  feedback: string;
+  reviewedBy: string;
+  reviewDate: string;
+  createdAt: string;
+}
+
+export interface Goal {
+  id: string;
+  description: string;
+  completionPercentage: number; // 0-100
+  status: 'not-started' | 'in-progress' | 'completed';
+}

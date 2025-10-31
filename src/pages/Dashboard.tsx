@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Navigation } from "@/components/Navigation";
 import { StatsCard } from "@/components/StatsCard";
@@ -26,6 +27,7 @@ import heroImage from "@/assets/hrms-hero.jpg";
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleFeatureClick = (feature: string) => {
     toast({
@@ -176,14 +178,27 @@ const Dashboard = () => {
                 </Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {features.map((feature, index) => (
-                  <FeatureCard
-                    key={index}
-                    {...feature}
-                    onClick={() => handleFeatureClick(feature.title)}
-                    comingSoon={true}
-                  />
-                ))}
+                {features.map((feature, index) => {
+                  // Performance Reviews and Reports & Analytics are functional
+                  const isFunctional = feature.title === "Performance Reviews" || feature.title === "Reports & Analytics";
+                  
+                  return (
+                    <FeatureCard
+                      key={index}
+                      {...feature}
+                      onClick={() => {
+                        if (feature.title === "Performance Reviews") {
+                          navigate("/performance-reviews");
+                        } else if (feature.title === "Reports & Analytics") {
+                          navigate("/reports-analytics");
+                        } else {
+                          handleFeatureClick(feature.title);
+                        }
+                      }}
+                      comingSoon={!isFunctional}
+                    />
+                  );
+                })}
               </div>
             </div>
 

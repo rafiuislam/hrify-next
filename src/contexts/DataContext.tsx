@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Employee, AttendanceRecord, LeaveRequest, PayrollRecord, ReceiptPaymentRecord } from '@/types/employee';
+import { Employee, AttendanceRecord, LeaveRequest, PayrollRecord, ReceiptPaymentRecord, PerformanceReview } from '@/types/employee';
 
 interface DataContextType {
   employees: Employee[];
@@ -7,6 +7,7 @@ interface DataContextType {
   leaves: LeaveRequest[];
   payroll: PayrollRecord[];
   receiptPayments: ReceiptPaymentRecord[];
+  performanceReviews: PerformanceReview[];
   addEmployee: (employee: Employee) => void;
   updateEmployee: (id: string, employee: Employee) => void;
   deleteEmployee: (id: string) => void;
@@ -19,6 +20,9 @@ interface DataContextType {
   addReceiptPayment: (record: ReceiptPaymentRecord) => void;
   updateReceiptPayment: (id: string, record: ReceiptPaymentRecord) => void;
   deleteReceiptPayment: (id: string) => void;
+  addPerformanceReview: (review: PerformanceReview) => void;
+  updatePerformanceReview: (id: string, review: PerformanceReview) => void;
+  deletePerformanceReview: (id: string) => void;
   refreshData: () => void;
 }
 
@@ -37,6 +41,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
   const [payroll, setPayroll] = useState<PayrollRecord[]>([]);
   const [receiptPayments, setReceiptPayments] = useState<ReceiptPaymentRecord[]>([]);
+  const [performanceReviews, setPerformanceReviews] = useState<PerformanceReview[]>([]);
 
   // Load initial data from localStorage
   const loadData = () => {
@@ -45,6 +50,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const storedLeaves = localStorage.getItem('hrms_leaves');
     const storedPayroll = localStorage.getItem('hrms_payroll');
     const storedReceiptPayments = localStorage.getItem('hrms_receipt_payments');
+    const storedPerformanceReviews = localStorage.getItem('hrms_performance_reviews');
 
     if (storedEmployees) {
       setEmployees(JSON.parse(storedEmployees));
@@ -229,6 +235,60 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setReceiptPayments(sampleRecords);
       localStorage.setItem('hrms_receipt_payments', JSON.stringify(sampleRecords));
     }
+
+    if (storedPerformanceReviews) {
+      setPerformanceReviews(JSON.parse(storedPerformanceReviews));
+    } else {
+      // Initialize with sample performance reviews
+      const sampleReviews = [
+        {
+          id: '1',
+          employeeId: '1',
+          reviewPeriodStart: '2024-01-01',
+          reviewPeriodEnd: '2024-06-30',
+          rating: 4,
+          goals: [
+            {
+              id: 'g1',
+              description: 'Complete React certification',
+              completionPercentage: 100,
+              status: 'completed' as const
+            },
+            {
+              id: 'g2',
+              description: 'Lead team project',
+              completionPercentage: 80,
+              status: 'in-progress' as const
+            }
+          ],
+          feedback: 'Excellent performance and leadership skills demonstrated throughout the review period.',
+          reviewedBy: 'HR Manager',
+          reviewDate: '2024-07-15',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          employeeId: '2',
+          reviewPeriodStart: '2024-01-01',
+          reviewPeriodEnd: '2024-06-30',
+          rating: 5,
+          goals: [
+            {
+              id: 'g3',
+              description: 'Increase social media engagement by 50%',
+              completionPercentage: 95,
+              status: 'completed' as const
+            }
+          ],
+          feedback: 'Outstanding marketing campaigns and exceptional client relations.',
+          reviewedBy: 'Marketing Director',
+          reviewDate: '2024-07-20',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      setPerformanceReviews(sampleReviews);
+      localStorage.setItem('hrms_performance_reviews', JSON.stringify(sampleReviews));
+    }
   };
 
   useEffect(() => {
@@ -337,6 +397,28 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     broadcastChange();
   };
 
+  // Performance review operations
+  const addPerformanceReview = (review: PerformanceReview) => {
+    const updated = [...performanceReviews, review];
+    setPerformanceReviews(updated);
+    localStorage.setItem('hrms_performance_reviews', JSON.stringify(updated));
+    broadcastChange();
+  };
+
+  const updatePerformanceReview = (id: string, review: PerformanceReview) => {
+    const updated = performanceReviews.map(r => r.id === id ? review : r);
+    setPerformanceReviews(updated);
+    localStorage.setItem('hrms_performance_reviews', JSON.stringify(updated));
+    broadcastChange();
+  };
+
+  const deletePerformanceReview = (id: string) => {
+    const updated = performanceReviews.filter(r => r.id !== id);
+    setPerformanceReviews(updated);
+    localStorage.setItem('hrms_performance_reviews', JSON.stringify(updated));
+    broadcastChange();
+  };
+
   const refreshData = () => {
     loadData();
   };
@@ -349,6 +431,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         leaves,
         payroll,
         receiptPayments,
+        performanceReviews,
         addEmployee,
         updateEmployee,
         deleteEmployee,
@@ -361,6 +444,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         addReceiptPayment,
         updateReceiptPayment,
         deleteReceiptPayment,
+        addPerformanceReview,
+        updatePerformanceReview,
+        deletePerformanceReview,
         refreshData,
       }}
     >

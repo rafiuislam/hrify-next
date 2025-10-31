@@ -20,8 +20,8 @@ export function Navigation() {
         { name: 'Attendance', icon: Clock, href: '/attendance' },
         { name: 'Leave Management', icon: Calendar, href: '/leave' },
         { name: 'Payroll', icon: DollarSign, href: '/payroll' },
-        { name: 'Performance', icon: TrendingUp, href: '#' },
-        { name: 'Reports', icon: FileText, href: '#' },
+        { name: 'Performance', icon: TrendingUp, href: '/performance-reviews' },
+        { name: 'Reports', icon: FileText, href: '/reports-analytics' },
       ];
     } else if (user?.role === 'hr') {
       return [
@@ -30,8 +30,8 @@ export function Navigation() {
         { name: 'Attendance', icon: Clock, href: '/attendance' },
         { name: 'Leave Management', icon: Calendar, href: '/leave' },
         { name: 'Payroll', icon: DollarSign, href: '/payroll' },
-        { name: 'Performance', icon: TrendingUp, href: '#' },
-        { name: 'Reports', icon: FileText, href: '#' },
+        { name: 'Performance', icon: TrendingUp, href: '/performance-reviews' },
+        { name: 'Reports', icon: FileText, href: '/reports-analytics' },
       ];
     } else if (user?.role === 'employee') {
       return [

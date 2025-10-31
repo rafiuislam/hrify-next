@@ -17,6 +17,8 @@ import Attendance from "./pages/Attendance";
 import Leave from "./pages/Leave";
 import NewLeaveRequest from "./pages/NewLeaveRequest";
 import Payroll from "./pages/Payroll";
+import PerformanceReviews from "./pages/PerformanceReviews";
+import ReportsAnalytics from "./pages/ReportsAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/edit-employee/:id" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><EditEmployee /></RoleGuard></ProtectedRoute>} />
             <Route path="/new-leave-request" element={<ProtectedRoute><NewLeaveRequest /></ProtectedRoute>} />
             <Route path="/payroll" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><Payroll /></RoleGuard></ProtectedRoute>} />
+            <Route path="/performance-reviews" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><PerformanceReviews /></RoleGuard></ProtectedRoute>} />
+            <Route path="/reports-analytics" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><ReportsAnalytics /></RoleGuard></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
