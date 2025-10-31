@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,22 +6,92 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
-import { PayrollRecord } from '@/types/employee';
 import { usePayroll } from '@/hooks/usePayroll';
-import { DollarSign, Plus, Download, Receipt } from 'lucide-react';
+import { useEmployees } from '@/hooks/useEmployees';
+import { DollarSign, Download, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { StatsCard } from '@/components/StatsCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReceiptPaymentManager } from '@/components/ReceiptPaymentManager';
+import { PayrollGenerationDialog } from '@/components/PayrollGenerationDialog';
 
 export default function Payroll() {
   const { user } = useAuth();
-  const { payroll, getPayrollByStatus } = usePayroll();
+  const { payroll, getPayrollByStatus, addPayroll } = usePayroll();
+  const { getActiveEmployees } = useEmployees();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showGenerationDialog, setShowGenerationDialog] = useState(false);
 
-  const handleGeneratePayroll = () => {
+  const handleGeneratePayroll = async () => {
+    setIsGenerating(true);
+    setShowGenerationDialog(true);
+
+    // Get all active employees
+    const activeEmployees = getActiveEmployees();
+    
+    if (activeEmployees.length === 0) {
+      toast({
+        title: "No Active Employees",
+        description: "There are no active employees to process payroll for.",
+        variant: "destructive",
+      });
+      setIsGenerating(false);
+      setShowGenerationDialog(false);
+      return;
+    }
+
+    // Wait for the dialog animation to complete
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    // Generate payroll for each active employee
+    const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+    const currentYear = new Date().getFullYear();
+
+    // Check if payroll already exists for this month
+    const existingPayroll = payroll.filter(
+      p => p.month === currentMonth && p.year === currentYear
+    );
+
+    if (existingPayroll.length > 0) {
+      toast({
+        title: "Payroll Already Exists",
+        description: `Payroll for ${currentMonth} ${currentYear} has already been generated.`,
+        variant: "destructive",
+      });
+      setIsGenerating(false);
+      setShowGenerationDialog(false);
+      return;
+    }
+
+    activeEmployees.forEach((employee) => {
+      const basicSalary = employee.salary;
+      // Calculate 10% allowances
+      const allowances = Math.round(basicSalary * 0.10);
+      // Calculate 15% deductions (taxes, insurance, etc.)
+      const deductions = Math.round(basicSalary * 0.15);
+      // Net salary = basic + allowances - deductions
+      const netSalary = basicSalary + allowances - deductions;
+
+      const payrollRecord = {
+        id: `${employee.id}-${currentMonth}-${currentYear}`,
+        employeeId: employee.id,
+        month: currentMonth,
+        year: currentYear,
+        basicSalary,
+        allowances,
+        deductions,
+        netSalary,
+        status: 'processed' as const,
+      };
+
+      addPayroll(payrollRecord);
+    });
+
+    setIsGenerating(false);
+
     toast({
-      title: "Payroll Generated",
-      description: "Monthly payroll has been generated successfully.",
+      title: "Payroll Generated Successfully",
+      description: `Payroll for ${activeEmployees.length} employee${activeEmployees.length !== 1 ? 's' : ''} has been processed for ${currentMonth} ${currentYear}.`,
     });
   };
 
@@ -79,12 +149,31 @@ export default function Payroll() {
               <div className="flex justify-between items-center">
                 <div></div>
                 {user?.role === 'admin' && (
-                  <Button onClick={handleGeneratePayroll} className="bg-primary hover:bg-primary/90">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Generate Payroll
+                  <Button 
+                    onClick={handleGeneratePayroll} 
+                    disabled={isGenerating}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Generate Payroll
+                      </>
+                    )}
                   </Button>
                 )}
               </div>
+
+              <PayrollGenerationDialog 
+                open={showGenerationDialog}
+                onOpenChange={setShowGenerationDialog}
+                totalEmployees={getActiveEmployees().length}
+              />
 
               <Card>
                 <CardHeader>
