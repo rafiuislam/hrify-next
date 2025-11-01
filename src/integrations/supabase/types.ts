@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string | null
+          date: string
+          employee_id: string
+          id: string
+          overtime: number | null
+          status: string
+          total_hours: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          date?: string
+          employee_id: string
+          id?: string
+          overtime?: number | null
+          status: string
+          total_hours?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          date?: string
+          employee_id?: string
+          id?: string
+          overtime?: number | null
+          status?: string
+          total_hours?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ip_whitelist: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          ip_address: string
+          is_active: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          ip_address: string
+          is_active?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          ip_address?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
