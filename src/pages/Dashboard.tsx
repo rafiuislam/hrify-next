@@ -179,8 +179,10 @@ const Dashboard = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {features.map((feature, index) => {
-                  // Performance Reviews and Reports & Analytics are functional
-                  const isFunctional = feature.title === "Performance Reviews" || feature.title === "Reports & Analytics";
+                  // Performance Reviews, Reports & Analytics, and Attendance Tracking are functional
+                  const isFunctional = feature.title === "Performance Reviews" || 
+                                      feature.title === "Reports & Analytics" ||
+                                      feature.title === "Attendance Tracking";
                   
                   return (
                     <FeatureCard
@@ -191,6 +193,8 @@ const Dashboard = () => {
                           navigate("/performance-reviews");
                         } else if (feature.title === "Reports & Analytics") {
                           navigate("/reports-analytics");
+                        } else if (feature.title === "Attendance Tracking") {
+                          navigate("/attendance");
                         } else {
                           handleFeatureClick(feature.title);
                         }
