@@ -20,17 +20,25 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      const redirectUrl = `${window.location.origin}/employee-register`;
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "Account created successfully. You can now sign in.",
+        title: "Account Created!",
+        description: "Please complete your employee registration.",
       });
+      
+      // Redirect to employee registration form
+      navigate('/employee-register');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -82,7 +90,7 @@ export default function Auth() {
           </div>
           <CardTitle className="text-2xl text-center">HRPro Management</CardTitle>
           <CardDescription className="text-center">
-            Sign in to access your HR dashboard
+            Sign in to access your HR dashboard or create an account to register as an employee
           </CardDescription>
         </CardHeader>
         <CardContent>

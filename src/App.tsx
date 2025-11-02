@@ -10,6 +10,8 @@ import { RoleGuard } from "./components/RoleGuard";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Auth from "./pages/Auth";
+import EmployeeRegister from "./pages/EmployeeRegister";
+import PendingApproval from "./pages/PendingApproval";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import AddEmployee from "./pages/AddEmployee";
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/employee-register" element={<ProtectedRoute requireActive={false}><EmployeeRegister /></ProtectedRoute>} />
+            <Route path="/pending-approval" element={<ProtectedRoute requireActive={false}><PendingApproval /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/employees" element={<ProtectedRoute><RoleGuard allowedRoles={['admin', 'hr']}><Employees /></RoleGuard></ProtectedRoute>} />
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />

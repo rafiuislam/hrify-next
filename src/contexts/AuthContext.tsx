@@ -1,68 +1,118 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 interface User {
   id: string;
   email: string;
-  name: string;
-  role: 'admin' | 'hr' | 'employee';
+  role: 'admin' | 'hr' | 'employee' | null;
+  employee_id?: string;
+  name?: string;
+  status?: 'pending' | 'active' | 'rejected';
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const defaultUsers = [
-  { id: '1', email: 'admin@hrms.com', password: 'admin123', name: 'Admin User', role: 'admin' as const },
-  { id: '2', email: 'hr@hrms.com', password: 'hr123', name: 'HR Manager', role: 'hr' as const },
-  { id: '3', email: 'employee@hrms.com', password: 'emp123', name: 'John Doe', role: 'employee' as const },
-];
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize default users in localStorage
-    const existingUsers = localStorage.getItem('hrms_users');
-    if (!existingUsers) {
-      localStorage.setItem('hrms_users', JSON.stringify(defaultUsers));
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        if (session?.user) {
+          loadUserData(session.user);
+        } else {
+          setUser(null);
+        }
+      }
+    );
 
-    // Check if user is logged in
-    const storedUser = localStorage.getItem('hrms_current_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        loadUserData(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('hrms_users') || '[]');
-    const foundUser = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('hrms_current_user', JSON.stringify(userWithoutPassword));
-      return true;
+  const loadUserData = async (supabaseUser: SupabaseUser) => {
+    try {
+      // Get user role
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      // Get employee data if exists
+      const { data: employeeData } = await supabase
+        .from('employees')
+        .select('id, name, status')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      setUser({
+        id: supabaseUser.id,
+        email: supabaseUser.email!,
+        role: roleData?.role || null,
+        employee_id: employeeData?.id,
+        name: employeeData?.name,
+        status: employeeData?.status
+      });
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
 
-  const logout = () => {
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('hrms_current_user');
+    setSession(null);
   };
 
   return (
     <AuthContext.Provider value={{
       user,
+      session,
       login,
       logout,
-      isAuthenticated: !!user,
+      isAuthenticated: !!session,
+      loading,
     }}>
       {children}
     </AuthContext.Provider>

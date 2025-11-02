@@ -179,8 +179,9 @@ const Dashboard = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {features.map((feature, index) => {
-                  // Performance Reviews, Reports & Analytics, and Attendance Tracking are functional
-                  const isFunctional = feature.title === "Performance Reviews" || 
+                  // Employee Management, Performance Reviews, Reports & Analytics, and Attendance Tracking are functional
+                  const isFunctional = feature.title === "Employee Management" ||
+                                      feature.title === "Performance Reviews" || 
                                       feature.title === "Reports & Analytics" ||
                                       feature.title === "Attendance Tracking";
                   
@@ -189,7 +190,9 @@ const Dashboard = () => {
                       key={index}
                       {...feature}
                       onClick={() => {
-                        if (feature.title === "Performance Reviews") {
+                        if (feature.title === "Employee Management") {
+                          navigate("/employees");
+                        } else if (feature.title === "Performance Reviews") {
                           navigate("/performance-reviews");
                         } else if (feature.title === "Reports & Analytics") {
                           navigate("/reports-analytics");
